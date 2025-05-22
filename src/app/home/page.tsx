@@ -13,6 +13,7 @@ import { Product } from "../lib/types/Product";
 export default function HomePage() {
   const { isLoggedIn, userData } = useAuth();
   const router = useRouter();
+  const [products, setProducts] = useState<Product[]>([]); // ✅ Tambahkan ini
 
   useEffect(() => {
     if (!isLoggedIn) {
