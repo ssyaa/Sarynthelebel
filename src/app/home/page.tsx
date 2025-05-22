@@ -11,15 +11,14 @@ import Footer from "../components/Footer";
 import { Product } from "../lib/types/Product";
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { isLoggedIn, userData } = useAuth();
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    if (!user) {
-      router.replace("/login"); // Kalau belum login, tendang balik
+    if (!isLoggedIn) {
+      router.push("/");
     }
-  }, [user]);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     const fetchProducts = async () => {
