@@ -1,49 +1,51 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import { CartProvider } from "context/Contextcart";
-import { AuthProvider } from "context/Authcontext";
-import Navbar from "app/components/Navbar";
-import HeroSection from "app/components/HeroSection";
-import Categories from "app/components/Categories";
-import AvailableProducts from "app/components/AvailableProducts";
-import RestockedSection from "app/components/RestockedSection";
-import Footer from "app/components/Footer";
-import { Product } from "app/lib/types/Product";
+import { useAuth } from "../../context/Authcontext";
+import { useRouter } from "next/navigation";
+import Navbar from "../components/Navbar";
+import HeroSection from "../components/HeroSection";
+import Categories from "../components/Categories";
+import AvailableProducts from "../components/AvailableProducts";
+import RestockedSection from "../components/RestockedSection";
+import Footer from "../components/Footer";
+import { Product } from "../lib/types/Product";
 
 export default function HomePage() {
-    const [products, setProducts] = useState<Product[]>([]);
+  const { user } = useAuth();
+  const router = useRouter();
+  const [products, setProducts] = useState<Product[]>([]);
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-        try {
-            const res = await fetch("/api/products");
-            if (!res.ok) throw new Error("Failed to fetch products");
-            const data: Product[] = await res.json();
-            setProducts(data);
-        } catch (error) {
-            console.error("Error fetching products:", error);
-        }
-        };
+  useEffect(() => {
+    if (!user) {
+      router.replace("/login"); // Kalau belum login, tendang balik
+    }
+  }, [user]);
 
-        fetchProducts();
-    }, []);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("/api/products");
+        if (!res.ok) throw new Error("Failed to fetch products");
+        const data: Product[] = await res.json();
+        setProducts(data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
-    const availableProducts = products.filter(p => p.stock > 0);
-    const restockedProducts = products.filter(p => p.stock === 0);
+  const availableProducts = products.filter(p => p.stock > 0);
+  const restockedProducts = products.filter(p => p.stock === 0);
 
-    return (
-        <AuthProvider>
-        <CartProvider>
-            <>
-            <Navbar />
-            <HeroSection />
-            <Categories />
-            <AvailableProducts products={availableProducts} />
-            <RestockedSection products={restockedProducts} />
-            <Footer />
-            </>
-        </CartProvider>
-        </AuthProvider>
-    );
+  return (
+    <>
+      <Navbar />
+      <HeroSection />
+      <Categories />
+      <AvailableProducts products={availableProducts} />
+      <RestockedSection products={restockedProducts} />
+      <Footer />
+    </>
+  );
 }
